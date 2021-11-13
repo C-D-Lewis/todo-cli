@@ -1,0 +1,22 @@
+{
+  "name": "@chris-lewis/todo",
+  "version": "1.0.0",
+  "description": "Simple todo list command line app",
+  "main": "./dist/index.js",
+  "author": "C-D-Lewis",
+  "license": "MIT",
+  "bin": {
+    "todo": "bin/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "colors": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.7",
+    "typescript": "^4.4.4"
+  }
+}

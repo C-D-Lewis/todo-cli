@@ -1,48 +1,13 @@
-/* eslint-disable import/extensions */
-/* eslint-disable import/no-unresolved */
-import { homedir } from 'os';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import pkg from '../package.json';
-import { AppState, CommandList } from './types';
 import 'colors';
+import pkg from '../package.json';
+import { CommandList } from './types';
+import {
+  getTodos, load, save, setTodos,
+} from './state';
+import { formatDate, spacePad } from './util';
 
 /** Runtime arguments */
 const ARGV = process.argv.slice(2);
-
-/** State file location */
-const STATE_FILE = `${homedir()}/.todo`;
-/** Initial state */
-const INITIAL_STATE: AppState = {
-  todos: [],
-};
-
-let state: AppState;
-
-/**
- * Save the state.
- */
-const save = () => {
-  writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), 'utf8');
-};
-
-/**
- * Load the state.
- */
-const load = () => {
-  if (!existsSync(STATE_FILE)) {
-    state = INITIAL_STATE;
-    save();
-  }
-  state = JSON.parse(readFileSync(STATE_FILE, 'utf8'));
-};
-
-/**
- * Pad a number with a space.
- *
- * @param {number} v - Value to pad.
- * @returns {string} Padded value.
- */
-const spacePad = (v: number) => (v < 10 ? ` ${v}` : v);
 
 /**
  * Add a todo.
@@ -50,12 +15,8 @@ const spacePad = (v: number) => (v < 10 ? ` ${v}` : v);
  * @param {Array<string>} words - Words of new item to add.
  */
 const add = (...words: Array<string>) => {
-  const message = words.join(' ');
-
-  state.todos.push({
-    message,
-    timestamp: Date.now(),
-  });
+  const newItem = { message: words.join(' '), timestamp: Date.now() };
+  setTodos([...getTodos(), newItem]);
   save();
 };
 
@@ -63,11 +24,16 @@ const add = (...words: Array<string>) => {
  * List existing todos.
  */
 const list = () => {
-  if (!state.todos.length) throw new Error('There are no items to show.');
+  const todos = getTodos();
+  if (!todos.length) throw new Error('There are no items to show.');
 
-  state.todos.forEach((item, index) => {
+  const maxLength = todos.reduce((acc, p) => (p.message.length > acc ? p.message.length : acc), 0);
+
+  todos.forEach((item, index) => {
     const { message, timestamp } = item;
-    console.log(`${`${spacePad(index)}:`.grey} ${message} ${`(${timestamp})`.grey}`);
+    const difference = maxLength - message.length;
+    const paddedMessage = `${message}${' '.repeat(difference)}`;
+    console.log(`${`${spacePad(index)}:`.grey} ${paddedMessage} ${`(${formatDate(timestamp)})`.grey}`);
   });
 };
 
@@ -78,11 +44,13 @@ const list = () => {
  * @param {Array<string>} words - Words of the new message content.
  */
 const update = (index: number, ...words: Array<string>) => {
-  if (!index || index > state.todos.length - 1) throw new Error('Invalid index');
+  const todos = getTodos();
+  if (!index || index > todos.length - 1) throw new Error('Invalid index');
   if (!words || !words.length) throw new Error('newMessage must be provided');
 
-  const newItem = { ...state.todos[index], message: words.join(' ') };
-  state.todos.splice(index, 1, newItem);
+  const newItem = { ...todos[index], message: words.join(' ') };
+  todos.splice(index, 1, newItem);
+  setTodos(todos);
   save();
 };
 
@@ -92,9 +60,11 @@ const update = (index: number, ...words: Array<string>) => {
  * @param {number} index - Index of the item to delete.
  */
 const deleteItem = (index: number) => {
-  if (!index || index > state.todos.length - 1) throw new Error('Invalid index');
+  const todos = getTodos();
+  if (!index || index > todos.length - 1) throw new Error('Invalid index');
 
-  state.todos.splice(index, 1);
+  todos.splice(index, 1);
+  setTodos(todos);
   save();
 };
 
@@ -103,6 +73,7 @@ const deleteItem = (index: number) => {
  */
 const printHelp = () => console.log(
   `${pkg.name} v${pkg.version}
+${pkg.description}
 
 Commands:
   ${'$'.grey} todo add|a ${'$message'.grey}

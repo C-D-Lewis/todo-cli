@@ -10,48 +10,25 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-/* eslint-disable import/extensions */
-/* eslint-disable import/no-unresolved */
-var os_1 = require("os");
-var fs_1 = require("fs");
-var package_json_1 = __importDefault(require("../package.json"));
 require("colors");
+var package_json_1 = __importDefault(require("../package.json"));
+var state_1 = require("./state");
+var util_1 = require("./util");
 /** Runtime arguments */
 var ARGV = process.argv.slice(2);
-/** State file location */
-var STATE_FILE = (0, os_1.homedir)() + "/.todo";
-/** Initial state */
-var INITIAL_STATE = {
-    todos: [],
-};
-var state;
-/**
- * Save the state.
- */
-var save = function () {
-    (0, fs_1.writeFileSync)(STATE_FILE, JSON.stringify(state, null, 2), 'utf8');
-};
-/**
- * Load the state.
- */
-var load = function () {
-    if (!(0, fs_1.existsSync)(STATE_FILE)) {
-        state = INITIAL_STATE;
-        save();
-    }
-    state = JSON.parse((0, fs_1.readFileSync)(STATE_FILE, 'utf8'));
-};
-/**
- * Pad a number with a space.
- *
- * @param {number} v - Value to pad.
- * @returns {string} Padded value.
- */
-var spacePad = function (v) { return (v < 10 ? " " + v : v); };
 /**
  * Add a todo.
  *
@@ -62,22 +39,23 @@ var add = function () {
     for (var _i = 0; _i < arguments.length; _i++) {
         words[_i] = arguments[_i];
     }
-    var message = words.join(' ');
-    state.todos.push({
-        message: message,
-        timestamp: Date.now(),
-    });
-    save();
+    var newItem = { message: words.join(' '), timestamp: Date.now() };
+    (0, state_1.setTodos)(__spreadArray(__spreadArray([], (0, state_1.getTodos)(), true), [newItem], false));
+    (0, state_1.save)();
 };
 /**
  * List existing todos.
  */
 var list = function () {
-    if (!state.todos.length)
+    var todos = (0, state_1.getTodos)();
+    if (!todos.length)
         throw new Error('There are no items to show.');
-    state.todos.forEach(function (item, index) {
+    var maxLength = todos.reduce(function (acc, p) { return (p.message.length > acc ? p.message.length : acc); }, 0);
+    todos.forEach(function (item, index) {
         var message = item.message, timestamp = item.timestamp;
-        console.log((spacePad(index) + ":").grey + " " + message + " " + ("(" + timestamp + ")").grey);
+        var difference = maxLength - message.length;
+        var paddedMessage = "" + message + ' '.repeat(difference);
+        console.log(((0, util_1.spacePad)(index) + ":").grey + " " + paddedMessage + " " + ("(" + (0, util_1.formatDate)(timestamp) + ")").grey);
     });
 };
 /**
@@ -91,13 +69,15 @@ var update = function (index) {
     for (var _i = 1; _i < arguments.length; _i++) {
         words[_i - 1] = arguments[_i];
     }
-    if (!index || index > state.todos.length - 1)
+    var todos = (0, state_1.getTodos)();
+    if (!index || index > todos.length - 1)
         throw new Error('Invalid index');
     if (!words || !words.length)
         throw new Error('newMessage must be provided');
-    var newItem = __assign(__assign({}, state.todos[index]), { message: words.join(' ') });
-    state.todos.splice(index, 1, newItem);
-    save();
+    var newItem = __assign(__assign({}, todos[index]), { message: words.join(' ') });
+    todos.splice(index, 1, newItem);
+    (0, state_1.setTodos)(todos);
+    (0, state_1.save)();
 };
 /**
  * Delete a todo.
@@ -105,10 +85,12 @@ var update = function (index) {
  * @param {number} index - Index of the item to delete.
  */
 var deleteItem = function (index) {
-    if (!index || index > state.todos.length - 1)
+    var todos = (0, state_1.getTodos)();
+    if (!index || index > todos.length - 1)
         throw new Error('Invalid index');
-    state.todos.splice(index, 1);
-    save();
+    todos.splice(index, 1);
+    (0, state_1.setTodos)(todos);
+    (0, state_1.save)();
 };
 /**
  * Print help content.
@@ -118,7 +100,7 @@ var printHelp = function () { return console.log(package_json_1.default.name + "
  * The main function.
  */
 var main = function () {
-    load();
+    (0, state_1.load)();
     var command = ARGV[0];
     var args = ARGV.slice(1);
     var commandMap = {

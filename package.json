@@ -1,7 +1,7 @@
 {
-  "name": "@chris-lewis/todo",
+  "name": "@chris-lewis/todo-cli",
   "version": "1.0.0",
-  "description": "Simple todo list command line app",
+  "description": "Simple todo list command line interface",
   "main": "./dist/src/index.js",
   "author": "C-D-Lewis",
   "license": "MIT",
@@ -40,7 +40,9 @@
       "dist"
     ],
     "rules": {
-      "no-console": 0
+      "no-console": 0,
+      "import/extensions": 0,
+      "import/no-unresolved": 0
     }
   }
 }

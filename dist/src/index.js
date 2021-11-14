@@ -46,11 +46,23 @@ var load = function () {
     state = JSON.parse((0, fs_1.readFileSync)(STATE_FILE, 'utf8'));
 };
 /**
+ * Pad a number with a space.
+ *
+ * @param {number} v - Value to pad.
+ * @returns {string} Padded value.
+ */
+var spacePad = function (v) { return (v < 10 ? " " + v : v); };
+/**
  * Add a todo.
  *
- * @param {string} message - New item to add.
+ * @param {Array<string>} words - Words of new item to add.
  */
-var add = function (message) {
+var add = function () {
+    var words = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        words[_i] = arguments[_i];
+    }
+    var message = words.join(' ');
     state.todos.push({
         message: message,
         timestamp: Date.now(),
@@ -61,30 +73,29 @@ var add = function (message) {
  * List existing todos.
  */
 var list = function () {
-    console.log('');
-    if (!state.todos.length) {
-        console.log('  There are no items to show.\n');
-        return;
-    }
-    state.todos.forEach(function (_a, index) {
-        var message = _a.message, timestamp = _a.timestamp;
-        console.log("  " + index + ": " + message + " (" + timestamp + ")");
+    if (!state.todos.length)
+        throw new Error('There are no items to show.');
+    state.todos.forEach(function (item, index) {
+        var message = item.message, timestamp = item.timestamp;
+        console.log((spacePad(index) + ":").grey + " " + message + " " + ("(" + timestamp + ")").grey);
     });
-    console.log('');
 };
 /**
  * Update a todo.
  *
  * @param {number} index = Index of the item to update.
- * @param {string} newMessage - New message content.
+ * @param {Array<string>} words - Words of the new message content.
  */
-var update = function (index, newMessage) {
-    if (!index || index > state.todos.length - 1) {
-        console.log('Invalid index');
-        return;
+var update = function (index) {
+    var words = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        words[_i - 1] = arguments[_i];
     }
-    var found = state.todos[index];
-    var newItem = __assign(__assign({}, found), { message: newMessage });
+    if (!index || index > state.todos.length - 1)
+        throw new Error('Invalid index');
+    if (!words || !words.length)
+        throw new Error('newMessage must be provided');
+    var newItem = __assign(__assign({}, state.todos[index]), { message: words.join(' ') });
     state.todos.splice(index, 1, newItem);
     save();
 };
@@ -94,6 +105,8 @@ var update = function (index, newMessage) {
  * @param {number} index - Index of the item to delete.
  */
 var deleteItem = function (index) {
+    if (!index || index > state.todos.length - 1)
+        throw new Error('Invalid index');
     state.todos.splice(index, 1);
     save();
 };
@@ -122,6 +135,11 @@ var main = function () {
         printHelp();
         return;
     }
-    commandMap[command].apply(commandMap, args);
+    try {
+        commandMap[command].apply(commandMap, args);
+    }
+    catch (err) {
+        console.log(("Error: " + err.message).red);
+    }
 };
 main();

@@ -37,11 +37,21 @@ const load = () => {
 };
 
 /**
+ * Pad a number with a space.
+ *
+ * @param {number} v - Value to pad.
+ * @returns {string} Padded value.
+ */
+const spacePad = (v: number) => (v < 10 ? ` ${v}` : v);
+
+/**
  * Add a todo.
  *
- * @param {string} message - New item to add.
+ * @param {Array<string>} words - Words of new item to add.
  */
-const add = (message: string) => {
+const add = (...words: Array<string>) => {
+  const message = words.join(' ');
+
   state.todos.push({
     message,
     timestamp: Date.now(),
@@ -53,33 +63,25 @@ const add = (message: string) => {
  * List existing todos.
  */
 const list = () => {
-  console.log('');
+  if (!state.todos.length) throw new Error('There are no items to show.');
 
-  if (!state.todos.length) {
-    console.log('  There are no items to show.\n');
-    return;
-  }
-
-  state.todos.forEach(({ message, timestamp }, index) => {
-    console.log(`  ${index}: ${message} (${timestamp})`);
+  state.todos.forEach((item, index) => {
+    const { message, timestamp } = item;
+    console.log(`${`${spacePad(index)}:`.grey} ${message} ${`(${timestamp})`.grey}`);
   });
-  console.log('');
 };
 
 /**
  * Update a todo.
  *
  * @param {number} index = Index of the item to update.
- * @param {string} newMessage - New message content.
+ * @param {Array<string>} words - Words of the new message content.
  */
-const update = (index: number, newMessage: string) => {
-  if (!index || index > state.todos.length - 1) {
-    console.log('Invalid index');
-    return;
-  }
+const update = (index: number, ...words: Array<string>) => {
+  if (!index || index > state.todos.length - 1) throw new Error('Invalid index');
+  if (!words || !words.length) throw new Error('newMessage must be provided');
 
-  const found = state.todos[index];
-  const newItem = { ...found, message: newMessage };
+  const newItem = { ...state.todos[index], message: words.join(' ') };
   state.todos.splice(index, 1, newItem);
   save();
 };
@@ -90,6 +92,8 @@ const update = (index: number, newMessage: string) => {
  * @param {number} index - Index of the item to delete.
  */
 const deleteItem = (index: number) => {
+  if (!index || index > state.todos.length - 1) throw new Error('Invalid index');
+
   state.todos.splice(index, 1);
   save();
 };
@@ -131,7 +135,11 @@ const main = () => {
     return;
   }
 
-  commandMap[command](...args);
+  try {
+    commandMap[command](...args);
+  } catch (err) {
+    console.log(`Error: ${(err as Error).message}`.red);
+  }
 };
 
 main();

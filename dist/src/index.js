@@ -95,7 +95,7 @@ var deleteItem = function (index) {
 /**
  * Print help content.
  */
-var printHelp = function () { return console.log(package_json_1.default.name + " v" + package_json_1.default.version + "\n\nCommands:\n  " + '$'.grey + " todo add|a " + '$message'.grey + "\n  " + '$'.grey + " todo list\n  " + '$'.grey + " todo update|u " + '$index'.grey + " " + '$newMessage'.grey + "\n  " + '$'.grey + " todo delete|d " + '$index'.grey); };
+var printHelp = function () { return console.log(package_json_1.default.name + " v" + package_json_1.default.version + "\n" + package_json_1.default.description + "\n\nCommands:\n  " + '$'.grey + " todo add|a " + '$message'.grey + "\n  " + '$'.grey + " todo list\n  " + '$'.grey + " todo update|u " + '$index'.grey + " " + '$newMessage'.grey + "\n  " + '$'.grey + " todo delete|d " + '$index'.grey); };
 /**
  * The main function.
  */

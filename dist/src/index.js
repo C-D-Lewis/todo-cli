@@ -10,10 +10,16 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+/* eslint-disable import/extensions */
+/* eslint-disable import/no-unresolved */
 var os_1 = require("os");
 var fs_1 = require("fs");
-var version = require(__dirname + "/../package.json").version;
+var package_json_1 = __importDefault(require("../package.json"));
+require("colors");
 /** Runtime arguments */
 var ARGV = process.argv.slice(2);
 /** State file location */
@@ -73,7 +79,6 @@ var list = function () {
  * @param {string} newMessage - New message content.
  */
 var update = function (index, newMessage) {
-    console.log({ index: index, newMessage: newMessage });
     if (!index || index > state.todos.length - 1) {
         console.log('Invalid index');
         return;
@@ -88,14 +93,14 @@ var update = function (index, newMessage) {
  *
  * @param {number} index - Index of the item to delete.
  */
-var _delete = function (index) {
+var deleteItem = function (index) {
     state.todos.splice(index, 1);
     save();
 };
 /**
  * Print help content.
  */
-var printHelp = function () { return console.log("\n  node-todo v" + version + "\n\n  Commands:\n    $ todo add|a $message\n    $ todo list\n    $ todo update|u $index $newMessage\n    $ todo delete|d $index\n"); };
+var printHelp = function () { return console.log(package_json_1.default.name + " v" + package_json_1.default.version + "\n\nCommands:\n  " + '$'.grey + " todo add|a " + '$message'.grey + "\n  " + '$'.grey + " todo list\n  " + '$'.grey + " todo update|u " + '$index'.grey + " " + '$newMessage'.grey + "\n  " + '$'.grey + " todo delete|d " + '$index'.grey); };
 /**
  * The main function.
  */
@@ -110,8 +115,8 @@ var main = function () {
         l: list,
         update: update,
         u: update,
-        delete: _delete,
-        d: _delete,
+        delete: deleteItem,
+        d: deleteItem,
     };
     if (!commandMap[command]) {
         printHelp();

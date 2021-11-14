@@ -1,7 +1,10 @@
+/* eslint-disable import/extensions */
+/* eslint-disable import/no-unresolved */
 import { homedir } from 'os';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
-const { version } = require(`${__dirname}/../package.json`);
+import pkg from '../package.json';
 import { AppState, CommandList } from './types';
+import 'colors';
 
 /** Runtime arguments */
 const ARGV = process.argv.slice(2);
@@ -18,7 +21,7 @@ let state: AppState;
 /**
  * Save the state.
  */
- const save = () => {
+const save = () => {
   writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), 'utf8');
 };
 
@@ -86,7 +89,7 @@ const update = (index: number, newMessage: string) => {
  *
  * @param {number} index - Index of the item to delete.
  */
-const _delete = (index: number) => {
+const deleteItem = (index: number) => {
   state.todos.splice(index, 1);
   save();
 };
@@ -94,15 +97,15 @@ const _delete = (index: number) => {
 /**
  * Print help content.
  */
-const printHelp = () => console.log(`
-  node-todo v${version}
+const printHelp = () => console.log(
+  `${pkg.name} v${pkg.version}
 
-  Commands:
-    $ todo add|a $message
-    $ todo list
-    $ todo update|u $index $newMessage
-    $ todo delete|d $index
-`);
+Commands:
+  ${'$'.grey} todo add|a ${'$message'.grey}
+  ${'$'.grey} todo list
+  ${'$'.grey} todo update|u ${'$index'.grey} ${'$newMessage'.grey}
+  ${'$'.grey} todo delete|d ${'$index'.grey}`,
+);
 
 /**
  * The main function.
@@ -120,8 +123,8 @@ const main = () => {
     l: list,
     update,
     u: update,
-    delete: _delete,
-    d: _delete,
+    delete: deleteItem,
+    d: deleteItem,
   };
   if (!commandMap[command]) {
     printHelp();

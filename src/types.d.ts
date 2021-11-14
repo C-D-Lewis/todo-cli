@@ -17,5 +17,5 @@ export interface AppState {
  * Command list type.
  */
 export interface CommandList {
-  [p: string]: Function;
+  [p: string]: function;
 }

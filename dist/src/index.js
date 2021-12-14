@@ -48,14 +48,27 @@ var add = function () {
  */
 var list = function () {
     var todos = (0, state_1.getTodos)();
-    if (!todos.length)
-        throw new Error('There are no items to show.');
+    if (!todos.length) {
+        console.log('There are no todo items to show.'.grey);
+        return;
+    }
+    // Calculate max linelength for alignment
     var maxLength = todos.reduce(function (acc, p) { return (p.message.length > acc ? p.message.length : acc); }, 0);
+    // Print each item
     todos.forEach(function (item, index) {
         var message = item.message, timestamp = item.timestamp;
-        var difference = maxLength - message.length;
-        var paddedMessage = "" + message + ' '.repeat(difference);
-        console.log(((0, util_1.spacePad)(index) + ":").grey + " " + paddedMessage + " " + ("(" + (0, util_1.formatDate)(timestamp) + ")").grey);
+        var padLength = maxLength - message.length;
+        var paddedMessage = "" + message + ' '.repeat(padLength);
+        // Decide color based on overdue time
+        var timeAgoStr = (0, util_1.formatTimeAgo)(timestamp);
+        var color = 'grey';
+        if (timeAgoStr.includes('day')) {
+            var daysAgo = timeAgoStr.replace('(', '').split(' ')[0];
+            if (parseInt(daysAgo, 10) > (0, state_1.getConfig)().overdueDays) {
+                color = 'red';
+            }
+        }
+        console.log(((0, util_1.spacePad)(index) + ":").grey + " " + paddedMessage + " " + ("(" + timeAgoStr + ")")[color]);
     });
 };
 /**
@@ -73,7 +86,7 @@ var update = function (index) {
     if (!index || index > todos.length - 1)
         throw new Error('Invalid index');
     if (!words || !words.length)
-        throw new Error('newMessage must be provided');
+        throw new Error('$newMessage must be provided');
     var newItem = __assign(__assign({}, todos[index]), { message: words.join(' ') });
     todos.splice(index, 1, newItem);
     (0, state_1.setTodos)(todos);
@@ -95,14 +108,13 @@ var deleteItem = function (index) {
 /**
  * Print help content.
  */
-var printHelp = function () { return console.log(package_json_1.default.name + " v" + package_json_1.default.version + "\n" + package_json_1.default.description + "\n\nCommands:\n  " + '$'.grey + " todo add|a " + '$message'.grey + "\n  " + '$'.grey + " todo list\n  " + '$'.grey + " todo update|u " + '$index'.grey + " " + '$newMessage'.grey + "\n  " + '$'.grey + " todo delete|d " + '$index'.grey); };
+var printHelp = function () { return console.log(package_json_1.default.name + " v" + package_json_1.default.version + " - " + package_json_1.default.description + "\n\nCommands:\n  " + '$'.grey + " todo add|a " + '$message'.grey + "\n  " + '$'.grey + " todo list\n  " + '$'.grey + " todo update|u " + '$index'.grey + " " + '$newMessage'.grey + "\n  " + '$'.grey + " todo delete|d " + '$index'.grey); };
 /**
  * The main function.
  */
 var main = function () {
     (0, state_1.load)();
     var command = ARGV[0];
-    var args = ARGV.slice(1);
     var commandMap = {
         add: add,
         a: add,
@@ -113,12 +125,15 @@ var main = function () {
         delete: deleteItem,
         d: deleteItem,
     };
+    // If nothing provided, show help
     if (!commandMap[command]) {
         printHelp();
         return;
     }
+    // Select command and run
     try {
-        commandMap[command].apply(commandMap, args);
+        var params = ARGV.slice(1);
+        commandMap[command].apply(commandMap, params);
     }
     catch (err) {
         console.log(("Error: " + err.message).red);

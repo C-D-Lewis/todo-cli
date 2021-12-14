@@ -1,10 +1,15 @@
 # todo-cli
 
+<p align="center" width="100%">
+    <img width="33%" src=""> 
+</p>
+
 Simple todo list command line interface. Manages a list of todo items,
 displaying them with date.
 
 * [Install](#install)
 * [Commands](#commands)
+* [Configuration](#configuration)
 
 
 ## Install
@@ -16,6 +21,7 @@ npm i -g @chris-lewis/todo-cli
 ```
 
 Then run with `todo`.
+
 
 ## Commands
 
@@ -51,4 +57,16 @@ Delete an item by index in the list with `delete`:
 
 ```
 todo delete 0
+```
+
+
+## Configuration
+
+### Overdue times
+
+The display of colors for overdue items listed is configurable in days, after
+which time they will be displayed with a red highlight.
+
+```
+todo config overdue $days
 ```

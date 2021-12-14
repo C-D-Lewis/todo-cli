@@ -1,21 +1,21 @@
-/**
- * Todo item type.
- */
+/** Todo item type. */
 export interface ToDoItem {
   message: string;
   timestamp: number;
 }
 
-/**
- * App state type.
- */
-export interface AppState {
-  todos: Array<ToDoItem>;
+/** App state config type. */
+export interface AppStateConfig {
+  overdueDays: number;
 }
 
-/**
- * Command list type.
- */
+/** App state type. */
+export interface AppState {
+  todos: Array<ToDoItem>;
+  config: AppStateConfig;
+}
+
+/** Command list type. */
 export interface CommandList {
   [p: string]: function;
 }

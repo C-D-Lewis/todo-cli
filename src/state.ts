@@ -1,12 +1,17 @@
 import { homedir } from 'os';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { AppState, ToDoItem } from './types';
+import { AppState, AppStateConfig, ToDoItem } from './types';
 
 /** State file location */
-const STATE_FILE = `${homedir()}/.todo`;
+const STATE_FILE = `${homedir()}/.todo-cli-config`;
+/** Default config */
+const DEFAULT_CONFIG = {
+  overdueDays: 3,
+};
 /** Initial state */
 const INITIAL_STATE: AppState = {
   todos: [],
+  config: DEFAULT_CONFIG,
 };
 
 let state: AppState;
@@ -26,7 +31,17 @@ export const load = () => {
     state = INITIAL_STATE;
     save();
   }
+
   state = JSON.parse(readFileSync(STATE_FILE, 'utf8'));
+
+  // Migrations
+  if (!state.config) {
+    state.config = { ...DEFAULT_CONFIG };
+  }
+  if (!state.config.overdueDays) {
+    state.config.overdueDays = DEFAULT_CONFIG.overdueDays;
+  }
+  save();
 };
 
 /**
@@ -44,3 +59,10 @@ export const getTodos = (): Array<ToDoItem> => state.todos;
 export const setTodos = (items: Array<ToDoItem>) => {
   state.todos = [...items];
 };
+
+/**
+ * Get the app state config.
+ *
+ * @returns {AppStateConfig} The config.
+ */
+export const getConfig = (): AppStateConfig => state.config;

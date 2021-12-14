@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.formatDate = exports.spacePad = void 0;
+exports.formatTimeAgo = exports.formatDate = exports.spacePad = void 0;
 /**
  * Pad a number with a space.
  *
@@ -21,3 +21,22 @@ var formatDate = function (timestamp) {
     return date + " " + time.split(':').slice(0, 2).join(':');
 };
 exports.formatDate = formatDate;
+/**
+ * Format 'x ago' string.
+ *
+ * @param {number} timestamp - Timestamp in the past.
+ * @returns {string} Format string.
+ */
+var formatTimeAgo = function (timestamp) {
+    var now = Date.now();
+    var then = new Date(timestamp).getTime();
+    var minsAgo = Math.round((now - then) / 60000);
+    if (minsAgo < 60)
+        return minsAgo + " minutes ago";
+    var hoursAgo = Math.round(minsAgo / 60);
+    if (hoursAgo < 24)
+        return hoursAgo + " hours ago";
+    var daysAgo = Math.round(hoursAgo / 24);
+    return daysAgo + " days ago";
+};
+exports.formatTimeAgo = formatTimeAgo;

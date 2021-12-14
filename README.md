@@ -1,7 +1,7 @@
 # todo-cli
 
 <p align="center" width="100%">
-    <img width="33%" src="https://raw.githubusercontent.com/C-D-Lewis/todo-cli/master/assets/screenshot.png"> 
+    <img width="60%" src="https://raw.githubusercontent.com/C-D-Lewis/todo-cli/master/assets/screenshot.png"> 
 </p>
 
 Simple todo list command line interface. Manages a list of todo items,

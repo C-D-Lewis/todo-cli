@@ -1,6 +1,6 @@
 {
   "name": "@chris-lewis/todo-cli",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Simple todo list command line interface",
   "main": "./dist/src/index.js",
   "author": "C-D-Lewis",

@@ -5,8 +5,8 @@ import { AppState, AppStateConfig, ToDoItem } from './types';
 /** State file location */
 const STATE_FILE = `${homedir()}/.todo-cli-config`;
 /** Default config */
-const DEFAULT_CONFIG = {
-  overdueDays: 3,
+const DEFAULT_CONFIG: AppStateConfig = {
+  overdueDays: '3',
 };
 /** Initial state */
 const INITIAL_STATE: AppState = {
@@ -19,7 +19,7 @@ let state: AppState;
 /**
  * Save the state.
  */
-export const save = () => {
+const save = () => {
   writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), 'utf8');
 };
 
@@ -58,6 +58,7 @@ export const getTodos = (): Array<ToDoItem> => state.todos;
  */
 export const setTodos = (items: Array<ToDoItem>) => {
   state.todos = [...items];
+  save();
 };
 
 /**
@@ -66,3 +67,13 @@ export const setTodos = (items: Array<ToDoItem>) => {
  * @returns {AppStateConfig} The config.
  */
 export const getConfig = (): AppStateConfig => state.config;
+
+/**
+ * Set the config.
+ *
+ * @param {AppStateConfig} newConfig - New updated config.
+ */
+export const setConfig = (newConfig: AppStateConfig) => {
+  state.config = { ...newConfig };
+  save();
+};

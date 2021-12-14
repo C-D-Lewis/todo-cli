@@ -6,7 +6,7 @@ export interface ToDoItem {
 
 /** App state config type. */
 export interface AppStateConfig {
-  overdueDays: number;
+  overdueDays: string;
 }
 
 /** App state type. */

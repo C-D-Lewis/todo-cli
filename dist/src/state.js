@@ -20,14 +20,14 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getConfig = exports.setTodos = exports.getTodos = exports.load = exports.save = void 0;
+exports.setConfig = exports.getConfig = exports.setTodos = exports.getTodos = exports.load = void 0;
 var os_1 = require("os");
 var fs_1 = require("fs");
 /** State file location */
 var STATE_FILE = (0, os_1.homedir)() + "/.todo-cli-config";
 /** Default config */
 var DEFAULT_CONFIG = {
-    overdueDays: 3,
+    overdueDays: '3',
 };
 /** Initial state */
 var INITIAL_STATE = {
@@ -41,14 +41,13 @@ var state;
 var save = function () {
     (0, fs_1.writeFileSync)(STATE_FILE, JSON.stringify(state, null, 2), 'utf8');
 };
-exports.save = save;
 /**
  * Load the state.
  */
 var load = function () {
     if (!(0, fs_1.existsSync)(STATE_FILE)) {
         state = INITIAL_STATE;
-        (0, exports.save)();
+        save();
     }
     state = JSON.parse((0, fs_1.readFileSync)(STATE_FILE, 'utf8'));
     // Migrations
@@ -58,7 +57,7 @@ var load = function () {
     if (!state.config.overdueDays) {
         state.config.overdueDays = DEFAULT_CONFIG.overdueDays;
     }
-    (0, exports.save)();
+    save();
 };
 exports.load = load;
 /**
@@ -75,6 +74,7 @@ exports.getTodos = getTodos;
  */
 var setTodos = function (items) {
     state.todos = __spreadArray([], items, true);
+    save();
 };
 exports.setTodos = setTodos;
 /**
@@ -84,3 +84,13 @@ exports.setTodos = setTodos;
  */
 var getConfig = function () { return state.config; };
 exports.getConfig = getConfig;
+/**
+ * Set the config.
+ *
+ * @param {AppStateConfig} newConfig - New updated config.
+ */
+var setConfig = function (newConfig) {
+    state.config = __assign({}, newConfig);
+    save();
+};
+exports.setConfig = setConfig;

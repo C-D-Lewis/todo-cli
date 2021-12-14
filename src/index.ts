@@ -3,9 +3,12 @@ import pkg from '../package.json';
 import { CommandList } from './types';
 import {
   getConfig,
-  getTodos, load, save, setTodos,
+  getTodos,
+  load,
+  setConfig,
+  setTodos,
 } from './state';
-import { formatDate, spacePad, formatTimeAgo } from './util';
+import { spacePad, formatTimeAgo } from './util';
 
 /** Runtime arguments */
 const ARGV = process.argv.slice(2);
@@ -19,7 +22,6 @@ const add = (...words: Array<string>) => {
   const newItem = { message: words.join(' '), timestamp: Date.now() };
 
   setTodos([...getTodos(), newItem]);
-  save();
 };
 
 /**
@@ -46,7 +48,7 @@ const list = () => {
     let color = 'grey';
     if (timeAgoStr.includes('day')) {
       const [daysAgo] = timeAgoStr.replace('(', '').split(' ');
-      if (parseInt(daysAgo, 10) > getConfig().overdueDays) {
+      if (parseInt(daysAgo, 10) > parseInt(getConfig().overdueDays, 10)) {
         color = 'red';
       }
     }
@@ -69,7 +71,6 @@ const update = (index: number, ...words: Array<string>) => {
   const newItem = { ...todos[index], message: words.join(' ') };
   todos.splice(index, 1, newItem);
   setTodos(todos);
-  save();
 };
 
 /**
@@ -83,7 +84,28 @@ const deleteItem = (index: number) => {
 
   todos.splice(index, 1);
   setTodos(todos);
-  save();
+};
+
+/**
+ * Configure an option.
+ *
+ * @param {string} option - Option name.
+ * @param {string} value - Option value from params.
+ */
+const configOption = (option: string, value: string) => {
+  const config = getConfig();
+
+  // Days until an item is overdue
+  if (option === 'overdueDays') {
+    config.overdueDays = value;
+    setConfig(config);
+  }
+
+  // Print options
+  console.log(
+    `Available options:
+  - overdueDays`,
+  );
 };
 
 /**
@@ -96,7 +118,8 @@ Commands:
   ${'$'.grey} todo add|a ${'$message'.grey}
   ${'$'.grey} todo list
   ${'$'.grey} todo update|u ${'$index'.grey} ${'$newMessage'.grey}
-  ${'$'.grey} todo delete|d ${'$index'.grey}`,
+  ${'$'.grey} todo delete|d ${'$index'.grey}
+  ${'$'.grey} todo config ${'$name'.grey} ${'$index'.grey}`,
 );
 
 /**
@@ -115,6 +138,7 @@ const main = () => {
     u: update,
     delete: deleteItem,
     d: deleteItem,
+    config: configOption,
   };
 
   // If nothing provided, show help

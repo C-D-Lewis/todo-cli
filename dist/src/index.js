@@ -41,7 +41,6 @@ var add = function () {
     }
     var newItem = { message: words.join(' '), timestamp: Date.now() };
     (0, state_1.setTodos)(__spreadArray(__spreadArray([], (0, state_1.getTodos)(), true), [newItem], false));
-    (0, state_1.save)();
 };
 /**
  * List existing todos.
@@ -64,7 +63,7 @@ var list = function () {
         var color = 'grey';
         if (timeAgoStr.includes('day')) {
             var daysAgo = timeAgoStr.replace('(', '').split(' ')[0];
-            if (parseInt(daysAgo, 10) > (0, state_1.getConfig)().overdueDays) {
+            if (parseInt(daysAgo, 10) > parseInt((0, state_1.getConfig)().overdueDays, 10)) {
                 color = 'red';
             }
         }
@@ -90,7 +89,6 @@ var update = function (index) {
     var newItem = __assign(__assign({}, todos[index]), { message: words.join(' ') });
     todos.splice(index, 1, newItem);
     (0, state_1.setTodos)(todos);
-    (0, state_1.save)();
 };
 /**
  * Delete a todo.
@@ -103,12 +101,27 @@ var deleteItem = function (index) {
         throw new Error('Invalid index');
     todos.splice(index, 1);
     (0, state_1.setTodos)(todos);
-    (0, state_1.save)();
+};
+/**
+ * Configure an option.
+ *
+ * @param {string} option - Option name.
+ * @param {string} value - Option value from params.
+ */
+var configOption = function (option, value) {
+    var config = (0, state_1.getConfig)();
+    // Days until an item is overdue
+    if (option === 'overdueDays') {
+        config.overdueDays = value;
+        (0, state_1.setConfig)(config);
+    }
+    // Print options
+    console.log("Available options:\n  - overdueDays");
 };
 /**
  * Print help content.
  */
-var printHelp = function () { return console.log(package_json_1.default.name + " v" + package_json_1.default.version + " - " + package_json_1.default.description + "\n\nCommands:\n  " + '$'.grey + " todo add|a " + '$message'.grey + "\n  " + '$'.grey + " todo list\n  " + '$'.grey + " todo update|u " + '$index'.grey + " " + '$newMessage'.grey + "\n  " + '$'.grey + " todo delete|d " + '$index'.grey); };
+var printHelp = function () { return console.log(package_json_1.default.name + " v" + package_json_1.default.version + " - " + package_json_1.default.description + "\n\nCommands:\n  " + '$'.grey + " todo add|a " + '$message'.grey + "\n  " + '$'.grey + " todo list\n  " + '$'.grey + " todo update|u " + '$index'.grey + " " + '$newMessage'.grey + "\n  " + '$'.grey + " todo delete|d " + '$index'.grey + "\n  " + '$'.grey + " todo config " + '$name'.grey + " " + '$index'.grey); };
 /**
  * The main function.
  */
@@ -124,6 +137,7 @@ var main = function () {
         u: update,
         delete: deleteItem,
         d: deleteItem,
+        config: configOption,
     };
     // If nothing provided, show help
     if (!commandMap[command]) {

@@ -68,5 +68,5 @@ The display of colors for overdue items listed is configurable in days, after
 which time they will be displayed with a red highlight.
 
 ```
-todo config overdue $days
+todo config overdueDays $days
 ```

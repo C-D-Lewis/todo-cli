@@ -22,6 +22,7 @@ const add = (...words: Array<string>) => {
   const newItem = { message: words.join(' '), timestamp: Date.now() };
 
   setTodos([...getTodos(), newItem]);
+  console.log(`${'Added:'.grey} ${newItem.message}`);
 };
 
 /**
@@ -68,9 +69,11 @@ const update = (index: number, ...words: Array<string>) => {
   if (!index || index > todos.length - 1) throw new Error('Invalid index');
   if (!words || !words.length) throw new Error('$newMessage must be provided');
 
-  const newItem = { ...todos[index], message: words.join(' ') };
+  const updated = words.join(' ');
+  const newItem = { ...todos[index], message: updated };
   todos.splice(index, 1, newItem);
   setTodos(todos);
+  console.log(`${'Updated:'.yellow} ${updated}`);
 };
 
 /**
@@ -82,8 +85,9 @@ const deleteItem = (index: number) => {
   const todos = getTodos();
   if (!index || index > todos.length - 1) throw new Error('Invalid index');
 
-  todos.splice(index, 1);
+  const [deleted] = todos.splice(index, 1);
   setTodos(todos);
+  console.log(`${'Done:'.green} ${deleted.message}`);
 };
 
 /**
@@ -116,10 +120,10 @@ const printHelp = () => console.log(
 
 Commands:
   ${'$'.grey} todo add|a ${'$message'.grey}
-  ${'$'.grey} todo list
+  ${'$'.grey} todo list|l
   ${'$'.grey} todo update|u ${'$index'.grey} ${'$newMessage'.grey}
-  ${'$'.grey} todo delete|d ${'$index'.grey}
-  ${'$'.grey} todo config ${'$name'.grey} ${'$index'.grey}`,
+  ${'$'.grey} todo done|d ${'$index'.grey}
+  ${'$'.grey} todo config ${'$name'.grey} ${'$value'.grey}`,
 );
 
 /**
@@ -136,7 +140,7 @@ const main = () => {
     l: list,
     update,
     u: update,
-    delete: deleteItem,
+    done: deleteItem,
     d: deleteItem,
     config: configOption,
   };

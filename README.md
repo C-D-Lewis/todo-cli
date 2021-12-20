@@ -53,10 +53,10 @@ todo update 0 Merge login page PR after QA
 
 ### Delete an item
 
-Delete an item by index in the list with `delete`:
+Delete an item by index in the list with `done` to mark it as complete:
 
 ```
-todo delete 0
+todo done 0
 ```
 
 

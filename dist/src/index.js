@@ -41,6 +41,7 @@ var add = function () {
     }
     var newItem = { message: words.join(' '), timestamp: Date.now() };
     (0, state_1.setTodos)(__spreadArray(__spreadArray([], (0, state_1.getTodos)(), true), [newItem], false));
+    console.log('Added:'.grey + " " + newItem.message);
 };
 /**
  * List existing todos.
@@ -86,9 +87,11 @@ var update = function (index) {
         throw new Error('Invalid index');
     if (!words || !words.length)
         throw new Error('$newMessage must be provided');
-    var newItem = __assign(__assign({}, todos[index]), { message: words.join(' ') });
+    var updated = words.join(' ');
+    var newItem = __assign(__assign({}, todos[index]), { message: updated });
     todos.splice(index, 1, newItem);
     (0, state_1.setTodos)(todos);
+    console.log('Updated:'.yellow + " " + updated);
 };
 /**
  * Delete a todo.
@@ -99,8 +102,9 @@ var deleteItem = function (index) {
     var todos = (0, state_1.getTodos)();
     if (!index || index > todos.length - 1)
         throw new Error('Invalid index');
-    todos.splice(index, 1);
+    var deleted = todos.splice(index, 1)[0];
     (0, state_1.setTodos)(todos);
+    console.log('Done:'.green + " " + deleted.message);
 };
 /**
  * Configure an option.
@@ -121,7 +125,7 @@ var configOption = function (option, value) {
 /**
  * Print help content.
  */
-var printHelp = function () { return console.log(package_json_1.default.name + " v" + package_json_1.default.version + " - " + package_json_1.default.description + "\n\nCommands:\n  " + '$'.grey + " todo add|a " + '$message'.grey + "\n  " + '$'.grey + " todo list\n  " + '$'.grey + " todo update|u " + '$index'.grey + " " + '$newMessage'.grey + "\n  " + '$'.grey + " todo delete|d " + '$index'.grey + "\n  " + '$'.grey + " todo config " + '$name'.grey + " " + '$index'.grey); };
+var printHelp = function () { return console.log(package_json_1.default.name + " v" + package_json_1.default.version + " - " + package_json_1.default.description + "\n\nCommands:\n  " + '$'.grey + " todo add|a " + '$message'.grey + "\n  " + '$'.grey + " todo list|l\n  " + '$'.grey + " todo update|u " + '$index'.grey + " " + '$newMessage'.grey + "\n  " + '$'.grey + " todo done|d " + '$index'.grey + "\n  " + '$'.grey + " todo config " + '$name'.grey + " " + '$value'.grey); };
 /**
  * The main function.
  */
@@ -135,7 +139,7 @@ var main = function () {
         l: list,
         update: update,
         u: update,
-        delete: deleteItem,
+        done: deleteItem,
         d: deleteItem,
         config: configOption,
     };

@@ -12,6 +12,7 @@ const DEFAULT_CONFIG: AppStateConfig = {
 const INITIAL_STATE: AppState = {
   todos: [],
   config: DEFAULT_CONFIG,
+  completed: [],
 };
 
 let state: AppState;
@@ -40,6 +41,9 @@ export const load = () => {
   }
   if (!state.config.overdueDays) {
     state.config.overdueDays = DEFAULT_CONFIG.overdueDays;
+  }
+  if (!state.completed) {
+    state.completed = [];
   }
   save();
 };
@@ -75,5 +79,22 @@ export const getConfig = (): AppStateConfig => state.config;
  */
 export const setConfig = (newConfig: AppStateConfig) => {
   state.config = { ...newConfig };
+  save();
+};
+
+/**
+ * Get the list of completed items.
+ *
+ * @returns {Array<ToDoItem>}
+ */
+export const getCompleted = (): Array<ToDoItem> => state.completed;
+
+/**
+ * Set the completed list.
+ *
+ * @param {Array<ToDoItem> items - New items list.
+ */
+export const setCompleted = (items: Array<ToDoItem>) => {
+  state.completed = [...items];
   save();
 };

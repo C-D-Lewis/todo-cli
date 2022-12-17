@@ -20,7 +20,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setConfig = exports.getConfig = exports.setTodos = exports.getTodos = exports.load = void 0;
+exports.setCompleted = exports.getCompleted = exports.setConfig = exports.getConfig = exports.setTodos = exports.getTodos = exports.load = void 0;
 var os_1 = require("os");
 var fs_1 = require("fs");
 /** State file location */
@@ -33,6 +33,7 @@ var DEFAULT_CONFIG = {
 var INITIAL_STATE = {
     todos: [],
     config: DEFAULT_CONFIG,
+    completed: [],
 };
 var state;
 /**
@@ -56,6 +57,9 @@ var load = function () {
     }
     if (!state.config.overdueDays) {
         state.config.overdueDays = DEFAULT_CONFIG.overdueDays;
+    }
+    if (!state.completed) {
+        state.completed = [];
     }
     save();
 };
@@ -94,3 +98,20 @@ var setConfig = function (newConfig) {
     save();
 };
 exports.setConfig = setConfig;
+/**
+ * Get the list of completed items.
+ *
+ * @returns {Array<ToDoItem>}
+ */
+var getCompleted = function () { return state.completed; };
+exports.getCompleted = getCompleted;
+/**
+ * Set the completed list.
+ *
+ * @param {Array<ToDoItem> items - New items list.
+ */
+var setCompleted = function (items) {
+    state.completed = __spreadArray([], items, true);
+    save();
+};
+exports.setCompleted = setCompleted;

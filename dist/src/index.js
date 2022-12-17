@@ -29,6 +29,40 @@ var state_1 = require("./state");
 var util_1 = require("./util");
 /** Runtime arguments */
 var ARGV = process.argv.slice(2);
+/** Max completed items to show */
+var MAX_COMPLETED = 5;
+/**
+ * Get max length of all items in a list.
+ *
+ * @param {Array<ToDoItem>} items - All items.
+ * @returns {number} Length of the longest item.
+ */
+var getMaxItemLength = function (items) { return items.reduce(function (acc, p) { return (p.message.length > acc ? p.message.length : acc); }, 0); };
+/**
+ * Render an item.
+ *
+ * @param {ToDoItem} item - Item to render.
+ * @param {number} index - List index.
+ * @param {number} maxLength - Max length of all items in the list.
+ * @param {boolean} isCompleted - If the item is completed.
+ */
+var renderItem = function (item, index, maxLength, isCompleted) {
+    if (isCompleted === void 0) { isCompleted = false; }
+    var message = item.message, timestamp = item.timestamp;
+    var padLength = maxLength - message.length;
+    var paddedMessage = ("" + message + ' '.repeat(padLength))[isCompleted ? 'gray' : 'white'];
+    // Decide color based on overdue time
+    var timeAgoStr = (0, util_1.formatTimeAgo)(timestamp);
+    var color = 'grey';
+    if (timeAgoStr.includes('day')) {
+        var daysAgo = timeAgoStr.replace('(', '').split(' ')[0];
+        if (parseInt(daysAgo, 10) > parseInt((0, state_1.getConfig)().overdueDays, 10) && !isCompleted) {
+            color = 'red';
+        }
+    }
+    var prefix = isCompleted ? '-' : (0, util_1.spacePad)(index) + ":";
+    console.log(("" + prefix).grey + " " + paddedMessage + " " + ("(" + timeAgoStr + ")")[color]);
+};
 /**
  * Add a todo.
  *
@@ -52,24 +86,18 @@ var list = function () {
         console.log('There are no todo items to show.'.grey);
         return;
     }
-    // Calculate max linelength for alignment
-    var maxLength = todos.reduce(function (acc, p) { return (p.message.length > acc ? p.message.length : acc); }, 0);
     // Print each item
-    todos.forEach(function (item, index) {
-        var message = item.message, timestamp = item.timestamp;
-        var padLength = maxLength - message.length;
-        var paddedMessage = "" + message + ' '.repeat(padLength);
-        // Decide color based on overdue time
-        var timeAgoStr = (0, util_1.formatTimeAgo)(timestamp);
-        var color = 'grey';
-        if (timeAgoStr.includes('day')) {
-            var daysAgo = timeAgoStr.replace('(', '').split(' ')[0];
-            if (parseInt(daysAgo, 10) > parseInt((0, state_1.getConfig)().overdueDays, 10)) {
-                color = 'red';
-            }
-        }
-        console.log(((0, util_1.spacePad)(index) + ":").grey + " " + paddedMessage + " " + ("(" + timeAgoStr + ")")[color]);
-    });
+    console.log('\nOutstanding:');
+    var maxTodoLength = getMaxItemLength(todos);
+    todos.forEach(function (item, index) { return renderItem(item, index, maxTodoLength); });
+    // Print most recent completed items
+    console.log('\nRecently completed:'.gray);
+    var completed = (0, state_1.getCompleted)();
+    var start = completed.length > MAX_COMPLETED ? completed.length - MAX_COMPLETED - 1 : 0;
+    var recent = completed.slice(start, completed.length);
+    recent.reverse();
+    var maxCompletedLength = getMaxItemLength(recent);
+    recent.forEach(function (item, index) { return renderItem(item, index, maxCompletedLength, true); });
 };
 /**
  * Update a todo.
@@ -105,6 +133,10 @@ var deleteItem = function (index) {
     var deleted = todos.splice(index, 1)[0];
     (0, state_1.setTodos)(todos);
     console.log('Done:'.green + " " + deleted.message);
+    // Place in completed history
+    var completed = (0, state_1.getCompleted)();
+    completed.push(deleted);
+    (0, state_1.setCompleted)(completed);
 };
 /**
  * Configure an option.

@@ -59,6 +59,7 @@ Delete an item by index in the list with `done` to mark it as complete:
 todo done 0
 ```
 
+A history of the 10 most recently completed tasks will be shown on list.
 
 ## Configuration
 

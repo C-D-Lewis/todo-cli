@@ -1,10 +1,12 @@
 import 'colors';
 import pkg from '../package.json';
-import { CommandList } from './types';
+import { CommandList, ToDoItem } from './types';
 import {
+  getCompleted,
   getConfig,
   getTodos,
   load,
+  setCompleted,
   setConfig,
   setTodos,
 } from './state';
@@ -12,6 +14,46 @@ import { spacePad, formatTimeAgo } from './util';
 
 /** Runtime arguments */
 const ARGV = process.argv.slice(2);
+/** Max completed items to show */
+const MAX_COMPLETED = 5;
+
+/**
+ * Get max length of all items in a list.
+ *
+ * @param {Array<ToDoItem>} items - All items.
+ * @returns {number} Length of the longest item.
+ */
+const getMaxItemLength = (items: Array<ToDoItem>) => items.reduce(
+  (acc, p) => (p.message.length > acc ? p.message.length : acc),
+  0,
+);
+
+/**
+ * Render an item.
+ *
+ * @param {ToDoItem} item - Item to render.
+ * @param {number} index - List index.
+ * @param {number} maxLength - Max length of all items in the list.
+ * @param {boolean} isCompleted - If the item is completed.
+ */
+const renderItem = (item: ToDoItem, index: number, maxLength: number, isCompleted = false) => {
+  const { message, timestamp } = item;
+  const padLength = maxLength - message.length;
+  const paddedMessage = `${message}${' '.repeat(padLength)}`[isCompleted ? 'gray' : 'white'];
+
+  // Decide color based on overdue time
+  const timeAgoStr = formatTimeAgo(timestamp);
+  let color = 'grey';
+  if (timeAgoStr.includes('day')) {
+    const [daysAgo] = timeAgoStr.replace('(', '').split(' ');
+    if (parseInt(daysAgo, 10) > parseInt(getConfig().overdueDays, 10) && !isCompleted) {
+      color = 'red';
+    }
+  }
+
+  const prefix = isCompleted ? '-' : `${spacePad(index)}:`;
+  console.log(`${`${prefix}`.grey} ${paddedMessage} ${`(${timeAgoStr})`[<any>color]}`);
+};
 
 /**
  * Add a todo.
@@ -35,27 +77,19 @@ const list = () => {
     return;
   }
 
-  // Calculate max linelength for alignment
-  const maxLength = todos.reduce((acc, p) => (p.message.length > acc ? p.message.length : acc), 0);
-
   // Print each item
-  todos.forEach((item, index) => {
-    const { message, timestamp } = item;
-    const padLength = maxLength - message.length;
-    const paddedMessage = `${message}${' '.repeat(padLength)}`;
+  console.log('\nOutstanding:');
+  const maxTodoLength = getMaxItemLength(todos);
+  todos.forEach((item, index) => renderItem(item, index, maxTodoLength));
 
-    // Decide color based on overdue time
-    const timeAgoStr = formatTimeAgo(timestamp);
-    let color = 'grey';
-    if (timeAgoStr.includes('day')) {
-      const [daysAgo] = timeAgoStr.replace('(', '').split(' ');
-      if (parseInt(daysAgo, 10) > parseInt(getConfig().overdueDays, 10)) {
-        color = 'red';
-      }
-    }
-
-    console.log(`${`${spacePad(index)}:`.grey} ${paddedMessage} ${`(${timeAgoStr})`[<any>color]}`);
-  });
+  // Print most recent completed items
+  console.log('\nRecently completed:'.gray);
+  const completed = getCompleted();
+  const start = completed.length > MAX_COMPLETED ? completed.length - MAX_COMPLETED - 1 : 0;
+  const recent = completed.slice(start, completed.length);
+  recent.reverse();
+  const maxCompletedLength = getMaxItemLength(recent);
+  recent.forEach((item, index) => renderItem(item, index, maxCompletedLength, true));
 };
 
 /**
@@ -88,6 +122,11 @@ const deleteItem = (index: number) => {
   const [deleted] = todos.splice(index, 1);
   setTodos(todos);
   console.log(`${'Done:'.green} ${deleted.message}`);
+
+  // Place in completed history
+  const completed = getCompleted();
+  completed.push(deleted);
+  setCompleted(completed);
 };
 
 /**

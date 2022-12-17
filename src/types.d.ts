@@ -13,6 +13,7 @@ export interface AppStateConfig {
 export interface AppState {
   todos: Array<ToDoItem>;
   config: AppStateConfig;
+  completed: Array<ToDoItem>;
 }
 
 /** Command list type. */

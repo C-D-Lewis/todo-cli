@@ -90,10 +90,12 @@ var list = function () {
     console.log('\nOutstanding:');
     var maxTodoLength = getMaxItemLength(todos);
     todos.forEach(function (item, index) { return renderItem(item, index, maxTodoLength); });
+    if (ARGV.includes('--no-recent'))
+        return;
     // Print most recent completed items
     console.log('\nRecently completed:'.gray);
     var completed = (0, state_1.getCompleted)();
-    var start = completed.length > MAX_COMPLETED ? completed.length - MAX_COMPLETED - 1 : 0;
+    var start = completed.length > MAX_COMPLETED ? completed.length - MAX_COMPLETED : 0;
     var recent = completed.slice(start, completed.length);
     recent.reverse();
     var maxCompletedLength = getMaxItemLength(recent);

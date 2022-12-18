@@ -43,6 +43,10 @@ List current items with `list`:
 todo list
 ```
 
+A history of the 10 most recently completed tasks will be shown on list.
+
+> `--no-recent` can be used to hide recently completed items.
+
 ### Update an item
 
 Update an item by index in the list with `update`:
@@ -58,8 +62,6 @@ Delete an item by index in the list with `done` to mark it as complete:
 ```
 todo done 0
 ```
-
-A history of the 10 most recently completed tasks will be shown on list.
 
 ## Configuration
 

@@ -82,10 +82,12 @@ const list = () => {
   const maxTodoLength = getMaxItemLength(todos);
   todos.forEach((item, index) => renderItem(item, index, maxTodoLength));
 
+  if (ARGV.includes('--no-recent')) return;
+
   // Print most recent completed items
   console.log('\nRecently completed:'.gray);
   const completed = getCompleted();
-  const start = completed.length > MAX_COMPLETED ? completed.length - MAX_COMPLETED - 1 : 0;
+  const start = completed.length > MAX_COMPLETED ? completed.length - MAX_COMPLETED : 0;
   const recent = completed.slice(start, completed.length);
   recent.reverse();
   const maxCompletedLength = getMaxItemLength(recent);

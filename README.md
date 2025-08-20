@@ -52,10 +52,12 @@ A history of the 10 most recently completed tasks will be shown on list.
 Update an item by index in the list with `update`:
 
 ```
-todo update 0 Merge login page PR after QA
+todo update 0
 ```
 
-### Delete an item
+You will be prompted for the updated todo text.
+
+### Completing an item
 
 Delete an item by index in the list with `done` to mark it as complete:
 

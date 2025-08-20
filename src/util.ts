@@ -1,3 +1,5 @@
+import readline from 'readline';
+
 /**
  * Pad a number with a space.
  *
@@ -37,4 +39,28 @@ export const formatTimeAgo = (timestamp: number): string => {
 
   const daysAgo = Math.round(hoursAgo / 24);
   return `${daysAgo} days ago`;
+};
+
+/**
+ * Get a value with a prompt.
+ *
+ * @param {string} label - Label to show in the prompt.
+ * @returns {Promise<string>} Promise that resolves with the input value.
+ */
+export const getValue = (label: string): Promise<string> => new Promise((resolve) => {
+  const int = readline.createInterface(process.stdin, process.stdout);
+  int.question(`${label}: `, (newText) => {
+    int.close();
+    resolve(newText);
+  });
+});
+
+/**
+ * Get a yes/no confirmation from the user.
+ *
+ * @returns {Promise<boolean>} Promise that resolves with true if the user confirmed.
+ */
+export const getConfirmation = async () => {
+  const input = await getValue('Confirm (yes/no)');
+  return input === 'yes';
 };

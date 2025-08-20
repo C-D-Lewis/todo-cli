@@ -10,7 +10,7 @@ import {
   setConfig,
   setTodos,
 } from './state';
-import { spacePad, formatTimeAgo } from './util';
+import { spacePad, formatTimeAgo, getValue } from './util';
 
 /** Runtime arguments */
 const ARGV = process.argv.slice(2);
@@ -52,7 +52,7 @@ const renderItem = (item: ToDoItem, index: number, maxLength: number, isComplete
   }
 
   const prefix = isCompleted ? '-' : `${spacePad(index)}:`;
-  console.log(`${`${prefix}`.grey} ${paddedMessage} ${`(${timeAgoStr})`[<any>color]}`);
+  console.log(`${`${prefix}`.grey} ${paddedMessage} ${`(${timeAgoStr})`[<never>color]}`);
 };
 
 /**
@@ -64,7 +64,7 @@ const add = (...words: Array<string>) => {
   const newItem = { message: words.join(' '), timestamp: Date.now() };
 
   setTodos([...getTodos(), newItem]);
-  console.log(`${'Added:'.grey} ${newItem.message}`);
+  console.log(`${'Added:'.green} ${newItem.message}`);
 };
 
 /**
@@ -72,14 +72,13 @@ const add = (...words: Array<string>) => {
  */
 const list = () => {
   const todos = getTodos();
-  if (!todos.length) {
-    console.log('There are no todo items to show.'.grey);
-    return;
-  }
 
   // Print each item
   console.log('\nOutstanding:');
   const maxTodoLength = getMaxItemLength(todos);
+  if (!todos.length) {
+    console.log('  There are no outstanding todos.'.green);
+  }
   todos.forEach((item, index) => renderItem(item, index, maxTodoLength));
 
   if (ARGV.includes('--no-recent')) return;
@@ -98,18 +97,18 @@ const list = () => {
  * Update a todo.
  *
  * @param {number} index = Index of the item to update.
- * @param {Array<string>} words - Words of the new message content.
  */
-const update = (index: number, ...words: Array<string>) => {
+const update = async (index: number) => {
   const todos = getTodos();
   if (!index || index > todos.length - 1) throw new Error('Invalid index');
-  if (!words || !words.length) throw new Error('$newMessage must be provided');
 
-  const updated = words.join(' ');
+  console.log(`Updating ${index}: ${todos[index].message}`.yellow);
+  const updated = await getValue('New text');
+
   const newItem = { ...todos[index], message: updated };
   todos.splice(index, 1, newItem);
   setTodos(todos);
-  console.log(`${'Updated:'.yellow} ${updated}`);
+  console.log(`${'Updated:'.green} ${updated}`);
 };
 
 /**
@@ -162,7 +161,7 @@ const printHelp = () => console.log(
 Commands:
   ${'$'.grey} todo add|a ${'$message'.grey}
   ${'$'.grey} todo list|l
-  ${'$'.grey} todo update|u ${'$index'.grey} ${'$newMessage'.grey}
+  ${'$'.grey} todo update|u ${'$index'.grey}
   ${'$'.grey} todo done|d ${'$index'.grey}
   ${'$'.grey} todo config ${'$name'.grey} ${'$value'.grey}`,
 );
